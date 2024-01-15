@@ -34,15 +34,14 @@ public class ColorBlitPass : ScriptableRenderPass {
         TextureHandle sourceTexture = resourceData.activeColorTexture;
         
         // We will create a temporary destination texture to hold the contents of our blit pass. This
-        //texture will match the size and format of the pipeline color buffer.
+        // texture will match the size and format of the pipeline color buffer.
         RenderTextureDescriptor descriptor = cameraData.cameraTargetDescriptor;
         
         // We also don't need the depth buffer
         descriptor.depthBufferBits = 0;
 
         // The newly created texture will be managed by Render Graph, we don’t have to worry about its lifecycle.
-        TextureHandle destinationTexture = UniversalRenderer.CreateRenderGraphTexture(renderGraph,
-        descriptor, "_TempRT", true);
+        TextureHandle destinationTexture = UniversalRenderer.CreateRenderGraphTexture(renderGraph, descriptor, "_TempRT", true);
 
         // Here we will add a RasterRenderPass that consumes our PassData. This is the first of the two
         // passes we will implement and will Blit from source color buffer to the temporary RT we just created.
@@ -67,9 +66,9 @@ public class ColorBlitPass : ScriptableRenderPass {
         // explore some alternatives that we can do to optimize this second blit away and avoid the round trip.
         using (var builder = renderGraph.AddRasterRenderPass<PassData>("Color Blit Resolve", out var passData, m_ProfilingSampler)) {
             passData.BlitMaterial = m_BlitMaterial;
+            passData.SourceTexture = destinationTexture;
 
             // Similar to the previous pass, however now we set destination texture as input and source as output.
-            passData.SourceTexture = destinationTexture;
             builder.UseTexture(destinationTexture, AccessFlags.Read);
             builder.SetRenderAttachment(sourceTexture, 0, AccessFlags.Write);
 
